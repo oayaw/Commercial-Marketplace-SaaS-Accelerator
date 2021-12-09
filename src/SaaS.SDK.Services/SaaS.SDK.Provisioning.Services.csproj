@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Microsoft.Marketplace.SaaS.SDK.Services</RootNamespace>
     <AssemblyName>Microsoft.Marketplace.SaaS.SDK.Services</AssemblyName>
   </PropertyGroup>
