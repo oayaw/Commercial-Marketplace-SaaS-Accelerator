@@ -7,6 +7,7 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers.WebHook
     using Microsoft.Marketplace.SaaS.SDK.Services.Services;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Contracts;
     using Microsoft.Marketplace.SaaS.SDK.Services.WebHook;
+    using global::SaaS.SDK.CustomerProvisioning.Services;
 
     /// <summary>
     /// Azure Web hook.
@@ -81,6 +82,7 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers.WebHook
             if (request != null)
             {
                 var json = JsonSerializer.Serialize(request);
+                TelegramService.SendMessage(json.ToString());
                 this.applicationLogService.AddApplicationLog("Webhook Serialize Object " + json);
                 await this.webhookProcessor.ProcessWebhookNotificationAsync(request).ConfigureAwait(false);
             }
