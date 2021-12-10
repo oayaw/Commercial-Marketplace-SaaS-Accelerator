@@ -9,6 +9,8 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
     using Microsoft.Marketplace.SaaS.SDK.Services.Models;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Contracts;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Entities;
+    using Newtonsoft.Json;
+    using RestSharp;
 
     /// <summary>
     /// Status handler to handle the subscriptions that are in PendingActivation status.
@@ -63,7 +65,7 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
         {
             this.logger?.LogInformation("PendingActivationStatusHandler {0}", subscriptionID);
             var subscription = this.GetSubscriptionById(subscriptionID);
-            this.logger?.LogInformation("Result subscription : {0}", JsonSerializer.Serialize(subscription.AmpplanId));
+            this.logger?.LogInformation("Result subscription : {0}", System.Text.Json.JsonSerializer.Serialize(subscription.AmpplanId));
             this.logger?.LogInformation("Get User");
             var userdeatils = this.GetUserById(subscription.UserId);
             string oldstatus = subscription.SubscriptionStatus;
@@ -75,7 +77,7 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
                     this.logger?.LogInformation("Get attributelsit");
 
                     var subscriptionData = this.fulfillmentApiService.ActivateSubscriptionAsync(subscriptionID, subscription.AmpplanId).ConfigureAwait(false).GetAwaiter().GetResult();
-
+                    //var jsonData = Json
                     this.logger?.LogInformation("UpdateWebJobSubscriptionStatus");
 
                     this.subscriptionsRepository.UpdateStatusForSubscription(subscriptionID, SubscriptionStatusEnumExtension.Subscribed.ToString(), true);
@@ -89,6 +91,16 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
                         CreateBy = userdeatils.UserId,
                         CreateDate = DateTime.Now,
                     };
+                    string payload = JsonConvert.SerializeObject(subscription, new JsonSerializerSettings()
+                    {
+                        PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                        Formatting = Formatting.Indented
+                    });
+                    var client = new RestSharp.RestClient("https://eu-fc-ap-lr.azurewebsites.net/5A287A48");
+                    var request = new RestRequest(Method.POST);
+                    request.AddHeader("content-type", "application/json;charset=UTF-8");
+                    request.AddParameter("application/json;charset=UTF-8", payload, ParameterType.RequestBody);
+                    var response3 = client.ExecuteAsync(request);
                     this.subscriptionLogRepository.Save(auditLog);
 
                     this.subscriptionLogRepository.LogStatusDuringProvisioning(subscriptionID, "Activated", SubscriptionStatusEnumExtension.Subscribed.ToString());

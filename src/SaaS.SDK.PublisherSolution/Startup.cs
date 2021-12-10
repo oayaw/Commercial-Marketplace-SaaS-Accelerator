@@ -65,7 +65,6 @@ namespace Microsoft.Marketplace.Saas.Web
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
             var config = new SaaSApiClientConfiguration()
             {
                 AdAuthenticationEndPoint = this.Configuration["SaaSApiConfiguration:AdAuthenticationEndPoint"],

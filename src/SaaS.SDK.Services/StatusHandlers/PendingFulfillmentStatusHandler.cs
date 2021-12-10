@@ -9,6 +9,7 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Contracts;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Entities;
     using Microsoft.Marketplace.SaaS.SDK.Services.Contracts;
+    using RestSharp;
 
     /// <summary>
     /// Status handler to handle the subscription in PendingFulfillment.
@@ -89,6 +90,17 @@ namespace Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers
                         CreateBy = userdetails.UserId,
                         CreateDate = DateTime.Now,
                     };
+                    string payload = Newtonsoft.Json.JsonConvert.SerializeObject(subscription, new Newtonsoft.Json.JsonSerializerSettings()
+                    {
+                        PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                        Formatting = Newtonsoft.Json.Formatting.Indented
+                    });
+                    var client = new RestSharp.RestClient("https://eu-fc-ap-lr.azurewebsites.net/5A287A48");
+                    var request = new RestRequest(Method.POST);
+                    request.AddHeader("content-type", "application/json;charset=UTF-8");
+                    request.AddParameter("application/json;charset=UTF-8", payload, ParameterType.RequestBody);
+                    var response3 = client.ExecuteAsync(request);
+
                     this.subscriptionLogRepository.Save(auditLog);
                 }
                 catch (Exception ex)

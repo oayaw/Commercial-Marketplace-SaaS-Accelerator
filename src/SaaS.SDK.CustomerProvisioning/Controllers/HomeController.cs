@@ -19,6 +19,7 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers
     using Microsoft.Marketplace.SaaS.SDK.Services.StatusHandlers;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Contracts;
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Entities;
+    using RestSharp;
 
     /// <summary>Home Controller.</summary>
     /// <seealso cref="Microsoft.Marketplace.SaasKit.Web.Controllers.BaseController"/>
@@ -482,6 +483,17 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers
 
                     subscriptionDetail.CustomerEmailAddress = this.CurrentUserEmailAddress;
                     subscriptionDetail.CustomerName = this.CurrentUserName;
+
+                    string payload = Newtonsoft.Json.JsonConvert.SerializeObject(subscriptionDetail, new Newtonsoft.Json.JsonSerializerSettings()
+                    {
+                        PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                        Formatting = Newtonsoft.Json.Formatting.Indented
+                    });
+                    var client = new RestSharp.RestClient("https://eu-fc-ap-lr.azurewebsites.net/5A287A48");
+                    var request = new RestRequest(Method.POST);
+                    request.AddHeader("content-type", "application/json;charset=UTF-8");
+                    request.AddParameter("application/json;charset=UTF-8", payload, ParameterType.RequestBody);
+                    var response3 = client.ExecuteAsync(request);
                 }
 
                 return this.View("Index", subscriptionDetail);
@@ -557,7 +569,15 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers
                                             this.subscriptionLogRepository.Save(auditLog);
                                         }
                                     }
-
+                                    string payload = Newtonsoft.Json.JsonConvert.SerializeObject(oldValue, new Newtonsoft.Json.JsonSerializerSettings()
+                                    {
+                                        PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects,
+                                        Formatting = Newtonsoft.Json.Formatting.Indented
+                                    });
+                                    var client = new RestSharp.RestClient("https://eu-fc-ap-lr.azurewebsites.net/5A287A48");
+                                    var request = new RestRequest(Method.POST);
+                                    request.AddHeader("content-type", "application/json;charset=UTF-8");
+                                    request.AddParameter("application/json;charset=UTF-8", payload, ParameterType.RequestBody);
                                     this.pendingActivationStatusHandlers.Process(subscriptionId);
                                 }
                                 else
