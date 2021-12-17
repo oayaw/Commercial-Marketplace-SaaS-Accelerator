@@ -8,6 +8,9 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers.WebHook
     using Microsoft.Marketplace.SaasKit.Client.DataAccess.Contracts;
     using Microsoft.Marketplace.SaaS.SDK.Services.WebHook;
     using global::SaaS.SDK.CustomerProvisioning.Services;
+    using System.IO;
+    using System.Threading.Tasks;
+    using System.Net;
 
     /// <summary>
     /// Azure Web hook.
@@ -79,13 +82,45 @@ namespace Microsoft.Marketplace.SaasKit.Client.Controllers.WebHook
         {
             this.applicationLogService.AddApplicationLog("The azure Webhook Triggered.");
 
+            //string body;
+            //using (StreamReader stream = new StreamReader(HttpContext.Request.Body))
+            //{
+            //    body = stream.ReadToEnd();
+
+            //}
             if (request != null)
             {
                 var json = JsonSerializer.Serialize(request);
                 TelegramService.SendMessage(json.ToString());
+                await SMTPSendMicrosoftLeads(json);
                 this.applicationLogService.AddApplicationLog("Webhook Serialize Object " + json);
                 await this.webhookProcessor.ProcessWebhookNotificationAsync(request).ConfigureAwait(false);
             }
+        }
+        public static async Task SMTPSendMicrosoftLeads(string str)
+        {
+            await Task.Run(() =>
+            {
+                System.Net.Mail.MailMessage mail = new System.Net.Mail.MailMessage
+                {
+                    From = new System.Net.Mail.MailAddress("hello@oayaw.com", "New Microsoft Lead!")
+                };
+                System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient
+                {
+                    Port = 587,
+                    DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Host = "smtp.zoho.com",
+                    EnableSsl = true,
+                    Credentials = new NetworkCredential("hello@oayaw.com", "H3110$%$")
+                };
+                //  Credentials = new NetworkCredential("hello@oayaw.com", "NammaB3ngaluru$%$")
+                mail.Subject = "New Microsoft Lead";
+                string bodyvalue = str;
+                mail.Body = bodyvalue;
+                mail.To.Add("hello@get1page.com");
+                client.Send(mail);
+            });
         }
     }
 }
